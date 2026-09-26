@@ -1,0 +1,13 @@
+{
+  "trigger": "auto (quality gate / freshness alert)",
+  "failed_checks_detected": "paper_id_unique, summary_length_at_least_30, title_length_at_least_8, summary_free_of_encoding_noise, unique_papers_at_least_90%_of_raw",
+  "freshness_alert": true,
+  "repair_source": "raw_records_json",
+  "raw_records": 24,
+  "repaired_rows": 24,
+  "fingerprint_run_1": "99e503a895b7be96ee7847e62e713dc1b3c3a013f07e0903ebccc5b88b4b064c",
+  "fingerprint_run_2": "99e503a895b7be96ee7847e62e713dc1b3c3a013f07e0903ebccc5b88b4b064c",
+  "idempotent": true,
+  "matches_baseline_content": true,
+  "post_repair_gate": "PASS"
+}

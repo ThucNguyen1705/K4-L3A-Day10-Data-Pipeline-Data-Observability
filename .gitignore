@@ -6,3 +6,6 @@ src/*.egg-info/
 lab/
 **/__pycache__/
 doc_verification_report.md
+.pytest_cache/
+.coverage
+htmlcov/

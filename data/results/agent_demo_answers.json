@@ -1,0 +1,15 @@
+{
+  "provider": "mock",
+  "model": "mock-tool-calling",
+  "status": "ok",
+  "results": [
+    {
+      "question": "What is the summary of the paper 'Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines'?",
+      "answer": "[mock] Top match: 'Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines' (10.1145/3637528.3671812), published 2026-07-22, by Quang Le, Yen Vu. Static benchmarks fail to capture domain drift in enterprise knowledge bases. We establish a synthetic test generator that auto-creates paired evaluation sets whenever new corpora are ingested."
+    },
+    {
+      "question": "Which papers discuss quality gates or data observability for RAG systems?",
+      "answer": "[mock] Top match: 'Data Observability and Quality Gates for Production RAG Systems' (10.1145/3637528.3671802), published 2026-06-12, by Anh Tran, Quoc Pham. Silent data corruption in RAG pipelines degrades LLM answer faithfulness without throwing runtime errors. We introduce automated quality gates using Great Expectations 1.x to catch stale and malformed embeddings before serving."
+    }
+  ]
+}

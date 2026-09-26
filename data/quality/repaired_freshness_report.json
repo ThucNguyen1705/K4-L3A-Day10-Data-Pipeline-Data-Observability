@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-09-26T04:25:34.396123+00:00",
+  "threshold_days": 180,
+  "max_stale_ratio": 0.25,
+  "total_rows": 24,
+  "stale_rows": 1,
+  "stale_ratio": 0.0417,
+  "latest_published": "2026-07-22",
+  "oldest_published": "2026-03-28",
+  "min_age_days": 66,
+  "median_age_days": 111.5,
+  "max_age_days": 182,
+  "is_fresh": true,
+  "status": "fresh",
+  "message": "1/24 rows (4.2%) are older than 180 days; SLA allows at most 25%."
+}

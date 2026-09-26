@@ -1,0 +1,241 @@
+{
+  "generated_at": "2026-09-26T04:25:25.262580+00:00",
+  "seed": 42,
+  "input_rows": 24,
+  "output_rows": 23,
+  "input_unique_paper_ids": 24,
+  "output_unique_paper_ids": 19,
+  "corruption_types": 6,
+  "corruptions": [
+    {
+      "id": 1,
+      "type": "drop_latest_records",
+      "description": "Dropped the 5 most recently published papers (20%).",
+      "params": {
+        "fraction": 0.2
+      },
+      "affected_paper_ids": [
+        "10.1145/3637528.3671812",
+        "10.1145/3637528.3671808",
+        "10.1145/3637528.3671804",
+        "10.1145/3637528.3671807",
+        "10.1145/3637528.3671824"
+      ],
+      "details": [
+        {
+          "paper_id": "10.1145/3637528.3671812",
+          "title": "Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines",
+          "published": "2026-07-22"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671808",
+          "title": "Multi-Agent Consensus for High-Stakes Fact Verification",
+          "published": "2026-07-19"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671804",
+          "title": "Freshness SLAs for Real-Time LLM Knowledge Augmentation",
+          "published": "2026-07-05"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671807",
+          "title": "Synthetic Corruption Testing: Stress-Testing Vector Search Robustness",
+          "published": "2026-06-25"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671824",
+          "title": "Advanced Perspectives on Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines",
+          "published": "2026-06-12"
+        }
+      ],
+      "expected_signal": "paper_id unique count below raw lineage count; freshness (latest_published moves back)",
+      "affected_count": 5
+    },
+    {
+      "id": 2,
+      "type": "blank_summary",
+      "description": "Replaced the abstract with an empty string.",
+      "params": {
+        "fraction": 0.15
+      },
+      "affected_paper_ids": [
+        "10.1145/3637528.3671810",
+        "10.1145/3637528.3671801",
+        "10.1145/3637528.3671811"
+      ],
+      "details": [
+        {
+          "paper_id": "10.1145/3637528.3671810",
+          "summary_before": "Embedding quality checks directly into data pipelines enables fail-closed govern",
+          "summary_after": ""
+        },
+        {
+          "paper_id": "10.1145/3637528.3671801",
+          "summary_before": "Retrieval-Augmented Generation (RAG) significantly improves large language model",
+          "summary_after": ""
+        },
+        {
+          "paper_id": "10.1145/3637528.3671811",
+          "summary_before": "Dense vector search excels at conceptual similarity but struggles with exact acr",
+          "summary_after": ""
+        }
+      ],
+      "expected_signal": "ExpectColumnValueLengthsToBeBetween(summary, min 30) fails",
+      "affected_count": 3
+    },
+    {
+      "id": 3,
+      "type": "inject_noise",
+      "description": "Inserted 3 garbage tokens (mojibake, U+FFFD, symbol bursts) into the abstract.",
+      "params": {
+        "tokens_per_row": 3,
+        "token_pool": [
+          "\ufffd\ufffd\ufffd",
+          "#@$%^&",
+          "~|~|~",
+          "\u00e2\u20ac\u2122\u00e2\u20ac\u2122",
+          "{{{}}}",
+          "&&**&&"
+        ]
+      },
+      "affected_paper_ids": [
+        "10.1145/3637528.3671820",
+        "10.1145/3637528.3671816",
+        "10.1145/3637528.3671806"
+      ],
+      "details": [
+        {
+          "paper_id": "10.1145/3637528.3671820",
+          "summary_after": "An extended empirical study on single LLM is susceptible to confirmation bias when evaluating \u00e2\u20ac\u2122\u00e2\u20ac\u2122 retrieved evidence."
+        },
+        {
+          "paper_id": "10.1145/3637528.3671816",
+          "summary_after": "An extended empirical study on e define freshness service-level agreements &&**&& (SLAs) for temporal document ingestion"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671806",
+          "summary_after": "Connecting LLMs directly \ufffd\ufffd\ufffd to raw warehouse ~|~|~ tables often #@$%^& results in schema misunderstandings. A governed "
+        }
+      ],
+      "expected_signal": "ExpectColumnValuesToNotMatchRegex(summary, noise pattern) fails",
+      "affected_count": 3
+    },
+    {
+      "id": 4,
+      "type": "truncate_title",
+      "description": "Cut the title to at most 7 characters.",
+      "params": {
+        "max_chars": 7
+      },
+      "affected_paper_ids": [
+        "10.1145/3637528.3671819",
+        "10.1145/3637528.3671813",
+        "10.1145/3637528.3671803"
+      ],
+      "details": [
+        {
+          "paper_id": "10.1145/3637528.3671819",
+          "title_before": "Advanced Perspectives on Synthetic Corruption Testing: Stress-Testing Vector Search Robustness",
+          "title_after": "Advance"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671813",
+          "title_before": "Advanced Perspectives on Agentic Retrieval-Augmented Generation for Knowledge-Intensive Tasks",
+          "title_after": "Adva"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671803",
+          "title_before": "Mitigating Ghost Vectors in Dense Retrieval via Idempotent Indexing",
+          "title_after": "Mitiga"
+        }
+      ],
+      "expected_signal": "ExpectColumnValueLengthsToBeBetween(title, min 8) fails",
+      "affected_count": 3
+    },
+    {
+      "id": 5,
+      "type": "stale_date",
+      "description": "Shifted the publication date back 365 days.",
+      "params": {
+        "fraction": 0.3,
+        "shift_days": 365
+      },
+      "affected_paper_ids": [
+        "10.1145/3637528.3671823",
+        "10.1145/3637528.3671822",
+        "10.1145/3637528.3671815",
+        "10.1145/3637528.3671814",
+        "10.1145/3637528.3671809",
+        "10.1145/3637528.3671805"
+      ],
+      "details": [
+        {
+          "paper_id": "10.1145/3637528.3671823",
+          "published_before": "2026-06-11",
+          "published_after": "2025-06-11"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671822",
+          "published_before": "2026-06-10",
+          "published_after": "2025-06-10"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671815",
+          "published_before": "2026-06-03",
+          "published_after": "2025-06-03"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671814",
+          "published_before": "2026-06-02",
+          "published_after": "2025-06-02"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671809",
+          "published_before": "2026-04-30",
+          "published_after": "2025-04-30"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671805",
+          "published_before": "2026-03-28",
+          "published_after": "2025-03-28"
+        }
+      ],
+      "expected_signal": "Freshness SLA: stale ratio (age_days > 180) exceeds 25%",
+      "affected_count": 6
+    },
+    {
+      "id": 6,
+      "type": "duplicate_rows",
+      "description": "Appended 4 exact copies of existing rows.",
+      "params": {
+        "fraction": 0.2
+      },
+      "affected_paper_ids": [
+        "10.1145/3637528.3671823",
+        "10.1145/3637528.3671817",
+        "10.1145/3637528.3671814",
+        "10.1145/3637528.3671811"
+      ],
+      "details": [
+        {
+          "paper_id": "10.1145/3637528.3671823",
+          "title": "Advanced Perspectives on Hybrid Search Architectures: Combining BM25 with Dense Representations"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671817",
+          "title": "Advanced Perspectives on Evaluating Retrieval Precision with Token F1 and LLM Judges"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671814",
+          "title": "Advanced Perspectives on Data Observability and Quality Gates for Production RAG Systems"
+        },
+        {
+          "paper_id": "10.1145/3637528.3671811",
+          "title": "Hybrid Search Architectures: Combining BM25 with Dense Representations"
+        }
+      ],
+      "expected_signal": "ExpectColumnValuesToBeUnique(paper_id) fails",
+      "affected_count": 4
+    }
+  ]
+}

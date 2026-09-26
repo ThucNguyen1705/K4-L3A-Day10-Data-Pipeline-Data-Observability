@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      LLM_PROVIDER: mock
+      LLM_MODEL: mock-tool-calling
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies (locked)
+        run: uv sync --extra dev --python 3.13
+
+      - name: Smoke test
+        run: uv run python -c "import chromadb, great_expectations, sentence_transformers; print('Moi truong san sang')"
+
+      - name: Unit + end-to-end tests (coverage >= 80%)
+        run: uv run python script/run_tests.py
+
+      - name: Phase 1 baseline pipeline
+        run: uv run python script/run_phase1.py
+
+      - name: Phase 2 corruption, repair and comparison
+        run: uv run python script/run_corruption_flow.py

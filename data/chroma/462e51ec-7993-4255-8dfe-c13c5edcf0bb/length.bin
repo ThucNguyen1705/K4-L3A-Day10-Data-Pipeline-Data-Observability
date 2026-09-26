@@ -1,0 +1,5 @@
+Title: Semantic Layer Integration for Agentic Text-to-SQL Pipelines
+Authors: Huy Dinh, Trang Vo
+Published: 2026-05-02
+Categories: Databases, Information Systems
+Summary: Connecting LLMs directly ï¿½ï¿½ï¿½ to raw warehouse ~|~|~ tables often #@$%^& results in schema misunderstandings. A governed semantic layer standardizes business metric definitions, dramatically boosting SQL generation accuracy.ÿ

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import json
 from statistics import mean
 import os
 import sys
@@ -60,14 +62,17 @@ Return:
 """.strip()
     try:
         llm = build_llm(settings=settings, temperature=0.0).with_structured_output(JudgeVerdict)
-        return llm.invoke(prompt)
+        verdict = llm.invoke(prompt)
+        if isinstance(verdict, JudgeVerdict):
+            return verdict
     except Exception:
-        score = 5 if _token_f1(reference, prediction) >= 0.95 else 3 if _token_f1(reference, prediction) >= 0.5 else 1
-        return JudgeVerdict(
-            score=score,
-            correct=score >= 3,
-            reasoning="Fallback heuristic judge used because the LLM evaluator was unavailable.",
-        )
+        pass
+    score = 5 if _token_f1(reference, prediction) >= 0.95 else 3 if _token_f1(reference, prediction) >= 0.5 else 1
+    return JudgeVerdict(
+        score=score,
+        correct=score >= 3,
+        reasoning="Fallback heuristic judge used because the LLM evaluator was unavailable.",
+    )
 
 
 def _run_ragas(settings: Settings, answers: list[dict[str, Any]]) -> dict[str, Any]:
@@ -100,6 +105,16 @@ def _run_ragas(settings: Settings, answers: list[dict[str, Any]]) -> dict[str, A
         return {"error": f"Ragas evaluation failed: {exc}"}
 
 
+def _summarize(answers: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "samples": len(answers),
+        "retrieval_hit_rate": mean(1.0 if item["retrieval_hit"] else 0.0 for item in answers),
+        "mean_token_f1": mean(item["token_f1"] for item in answers),
+        "judge_accuracy": mean(1.0 if item["judge"]["correct"] else 0.0 for item in answers),
+        "mean_judge_score": mean(item["judge"]["score"] for item in answers),
+    }
+
+
 def evaluate_pipeline(
     settings: Settings,
     index: LocalEmbeddingIndex,
@@ -130,13 +145,16 @@ def evaluate_pipeline(
             }
         )
 
-    summary = {
-        "samples": len(answers),
-        "retrieval_hit_rate": mean(1.0 if item["retrieval_hit"] else 0.0 for item in answers),
-        "mean_token_f1": mean(item["token_f1"] for item in answers),
-        "judge_accuracy": mean(1.0 if item["judge"]["correct"] else 0.0 for item in answers),
-        "mean_judge_score": mean(item["judge"]["score"] for item in answers),
+    summary = _summarize(answers)
+    fallback_judges = sum(1 for item in answers if item["judge"]["reasoning"].startswith("Fallback heuristic judge"))
+    summary["judge_backend"] = (
+        "heuristic-fallback" if fallback_judges == len(answers) else "llm" if fallback_judges == 0 else "mixed"
+    )
+    summary["by_question_type"] = {
+        question_type: _summarize([item for item in answers if item["question_type"] == question_type])
+        for question_type in sorted({item["question_type"] for item in answers})
     }
+    summary["test_set_sha256"] = hashlib.sha256(json.dumps(test_set, sort_keys=True).encode("utf-8")).hexdigest()
     summary["ragas"] = _run_ragas(settings, answers)
 
     bundle = EvaluationBundle(summary=summary, answers=answers)

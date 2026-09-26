@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
+import re
+import shutil
+import sqlite3
 from typing import Any
 
 import chromadb
@@ -10,6 +14,9 @@ import pandas as pd
 from core.config import Settings
 from core.utils import read_json, safe_slug, write_json
 from retrieval.embeddings import MiniLMEmbeddings
+
+
+_SEGMENT_DIR_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 
 @dataclass(frozen=True)
@@ -80,6 +87,35 @@ class LocalEmbeddingIndex:
             return name_map[resolved_path]
         return safe_slug(embeddings_output_path.stem)
 
+    @staticmethod
+    def _prune_orphan_segments(persist_path: Path) -> list[str]:
+        """Chroma leaves the HNSW folder of a deleted collection on disk; remove folders no segment references."""
+        database = persist_path / "chroma.sqlite3"
+        if not database.exists():
+            return []
+        with closing(sqlite3.connect(database)) as connection:
+            active = {str(row[0]) for row in connection.execute("SELECT id FROM segments")}
+        removed = []
+        for child in persist_path.iterdir():
+            if child.is_dir() and _SEGMENT_DIR_RE.fullmatch(child.name) and child.name not in active:
+                shutil.rmtree(child, ignore_errors=True)  # a file still locked on Windows is retried next run
+                if not child.exists():
+                    removed.append(child.name)
+        return removed
+
+    @staticmethod
+    def _portable_path(settings: Settings, path: Path) -> str:
+        """Store paths relative to the project so manifests work on any machine."""
+        try:
+            return path.resolve().relative_to(settings.paths.project_dir).as_posix()
+        except ValueError:
+            return str(path)
+
+    @staticmethod
+    def _resolve_path(settings: Settings, value: str) -> Path:
+        path = Path(value)
+        return path if path.is_absolute() else settings.paths.project_dir / path
+
     @classmethod
     def build(
         cls,
@@ -110,13 +146,15 @@ class LocalEmbeddingIndex:
             metadatas=[document["metadata"] for document in documents],
         )
 
+        cls._prune_orphan_segments(persist_path)
+
         manifest_path = embeddings_output_path or settings.paths.embeddings_json
         write_json(
             manifest_path,
             {
                 "backend": "chroma",
                 "embedding_model": settings.embedding_model,
-                "persist_path": str(persist_path),
+                "persist_path": cls._portable_path(settings, persist_path),
                 "collection_name": collection_name,
                 "documents": documents,
             },
@@ -135,7 +173,7 @@ class LocalEmbeddingIndex:
             settings=settings,
             collection_name=payload["collection_name"],
             documents=payload["documents"],
-            persist_path=Path(payload["persist_path"]),
+            persist_path=cls._resolve_path(settings, payload["persist_path"]),
         )
 
     def search(self, query: str, top_k: int | None = None) -> list[SearchResult]:
